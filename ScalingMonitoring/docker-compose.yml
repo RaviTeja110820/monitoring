@@ -52,8 +52,8 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
-      - "--storage.tsdb.min-block-duration=2h"
-      - "--storage.tsdb.max-block-duration=2h"
+      - "--storage.tsdb.min-block-duration=1m"
+      - "--storage.tsdb.max-block-duration=1m"
       - "--web.enable-lifecycle"
 
     volumes:
@@ -82,8 +82,8 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
-      - "--storage.tsdb.min-block-duration=2h"
-      - "--storage.tsdb.max-block-duration=2h"
+      - "--storage.tsdb.min-block-duration=1m"
+      - "--storage.tsdb.max-block-duration=1m"
       - "--web.enable-lifecycle"
 
     volumes:
@@ -112,8 +112,8 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
-      - "--storage.tsdb.min-block-duration=2h"
-      - "--storage.tsdb.max-block-duration=2h"
+      - "--storage.tsdb.min-block-duration=1m"
+      - "--storage.tsdb.max-block-duration=1m"
       - "--web.enable-lifecycle"
 
     volumes:
