@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    restart: unless-stopped
+
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/recording_rules.yml:/etc/prometheus/recording_rules.yml
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+    ports:
+      - "9090:9090"
+
+    depends_on:
+      - alertmanager
+
+    networks:
+      - monitoring
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: alertmanager
+
+    restart: unless-stopped
+
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+
+    ports:
+      - "9093:9093"
+
+    networks:
+      - monitoring
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+
+    container_name: jaeger
+
+    restart: unless-stopped
+
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+
+    networks:
+      - monitoring
+  app:
+    build: ./app
+
+    container_name: springboot-app
+
+    depends_on:
+      - jaeger
+
+    ports:
+      - "8080:8080"
+
+    networks:
+      - monitoring
+networks:
+  monitoring:

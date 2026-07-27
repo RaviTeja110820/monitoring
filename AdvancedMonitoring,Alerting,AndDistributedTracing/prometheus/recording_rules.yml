@@ -1,0 +1,9 @@
+groups:
+
+- name: recording_rules
+
+  rules:
+
+  - record: job:up:sum
+
+    expr: sum(up)

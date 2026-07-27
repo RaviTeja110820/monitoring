@@ -1,0 +1,21 @@
+groups:
+
+- name: alert_rules
+
+  rules:
+
+  - alert: InstanceDown
+
+    expr: up == 0
+
+    for: 1m
+
+    labels:
+
+      severity: critical
+
+    annotations:
+
+      summary: "Instance Down"
+
+      description: "Prometheus target is unreachable."
