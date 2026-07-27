@@ -120,7 +120,7 @@ services:
 # thanos-sidecar-a, thanos-sidecar-b, thanos-sidecar-c
 # ==========================================================
   thanos-sidecar-a:
-    image: quay.io/thanos/thanos:v0.38.0
+    image: quay.io/thanos/thanos:v0.34.1
     container_name: thanos-sidecar-a
     restart: unless-stopped
 
@@ -149,7 +149,7 @@ services:
 
 
   thanos-sidecar-b:
-    image: quay.io/thanos/thanos:v0.38.0
+    image: quay.io/thanos/thanos:v0.34.1
     container_name: thanos-sidecar-b
     restart: unless-stopped
 
@@ -178,7 +178,7 @@ services:
 
 
   thanos-sidecar-c:
-    image: quay.io/thanos/thanos:v0.38.0
+    image: quay.io/thanos/thanos:v0.34.1
     container_name: thanos-sidecar-c
     restart: unless-stopped
 
@@ -209,7 +209,7 @@ services:
 # ==========================================================
 
   thanos-store:
-    image: quay.io/thanos/thanos:v0.38.0
+    image: quay.io/thanos/thanos:v0.34.1
     container_name: thanos-store
     restart: unless-stopped
 
@@ -236,7 +236,7 @@ services:
 # thanos-query
 # ==========================================================
   thanos-query:
-    image: quay.io/thanos/thanos:v0.38.0
+    image: quay.io/thanos/thanos:v0.34.1
     container_name: thanos-query
     restart: unless-stopped
 
