@@ -320,3 +320,5 @@ volumes:
   prometheus-c-data:
 
   grafana-data:
+
+  thanos-store-data:
