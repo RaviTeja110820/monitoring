@@ -213,31 +213,32 @@ services:
 # ==========================================================
 # thanos-store
 # ==========================================================
-thanos-store:
-  image: quay.io/thanos/thanos:v0.34.1
-  container_name: thanos-store
-  restart: unless-stopped
 
-  command:
-    - store
-    - --log.level=info
-    - --grpc-address=0.0.0.0:10901
-    - --http-address=0.0.0.0:10902
-    - --data-dir=/data
-    - --objstore.config-file=/etc/thanos/bucket.yml
+  thanos-store:
+    image: quay.io/thanos/thanos:v0.34.1
+    container_name: thanos-store
+    restart: unless-stopped
 
-  volumes:
-    - ./thanos/bucket.yml:/etc/thanos/bucket.yml
-    - thanos-store-data:/data
+    command:
+      - store
+      - --log.level=info
+      - --grpc-address=0.0.0.0:10901
+      - --http-address=0.0.0.0:10902
+      - --data-dir=/data
+      - --objstore.config-file=/etc/thanos/bucket.yml
 
-  ports:
-    - "10930:10902"
+    volumes:
+      - ./thanos/bucket.yml:/etc/thanos/bucket.yml
+      - thanos-store-data:/data
 
-  depends_on:
-    - minio
+    ports:
+      - "10930:10902"
 
-  networks:
-    - monitoring
+    depends_on:
+      - minio
+
+    networks:
+      - monitoring
 # ==========================================================
 # thanos-query
 # ==========================================================
