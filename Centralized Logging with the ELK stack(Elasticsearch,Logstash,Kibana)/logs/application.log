@@ -1,0 +1,8 @@
+2026-07-27 10:00:00 INFO Application Started Successfully
+2026-07-27 10:01:05 INFO User Login Successful
+2026-07-27 10:02:14 WARN Disk Usage Above 70 Percent
+2026-07-27 10:03:48 ERROR Database Connection Failed
+2026-07-27 10:05:10 INFO Background Job Started
+2026-07-27 10:06:33 WARN High CPU Usage Detected
+2026-07-27 10:07:50 ERROR Unable to Connect Payment Gateway
+2026-07-27 10:08:40 INFO User Logout Successful
