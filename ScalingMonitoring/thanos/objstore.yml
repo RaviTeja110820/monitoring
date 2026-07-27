@@ -1,0 +1,25 @@
+# ==========================================================
+# Thanos Object Store Configuration
+# Backend : MinIO (S3 Compatible)
+# ==========================================================
+
+type: S3
+
+config:
+  bucket: thanos
+
+  endpoint: minio:9000
+
+  access_key: admin
+  secret_key: admin123
+
+  insecure: true
+
+  signature_version2: false
+
+  http_config:
+    idle_conn_timeout: 90s
+    response_header_timeout: 2m
+    insecure_skip_verify: true
+
+  encrypt_sse: false

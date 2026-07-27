@@ -1,0 +1,25 @@
+# ==========================================
+# Global Configuration
+# ==========================================
+
+global:
+
+  scrape_interval: 15s
+
+  evaluation_interval: 15s
+
+# ==========================================
+# Scrape Configurations
+# ==========================================
+
+scrape_configs:
+
+# Prometheus itself
+
+- job_name: "prometheus-a"
+
+  static_configs:
+
+  - targets:
+
+    - localhost:9090

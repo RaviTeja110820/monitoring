@@ -1,0 +1,316 @@
+version: "3.9"
+
+# ==========================================================
+# Project 5.4
+# Scaling Monitoring Infrastructure using Thanos
+# ==========================================================
+
+services:
+
+# ==========================================================
+# MinIO Object Storage
+# ==========================================================
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+
+    command: server /data --console-address ":9001"
+
+    restart: unless-stopped
+
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+
+    volumes:
+      - minio-data:/data
+
+    networks:
+      - monitoring
+
+# ==========================================================
+# Prometheus A
+# ==========================================================
+
+  prometheus-a:
+
+    image: prom/prometheus:latest
+
+    container_name: prometheus-a
+
+    restart: unless-stopped
+
+    ports:
+      - "9090:9090"
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+
+    volumes:
+      - ./prometheus-a/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-a-data:/prometheus
+
+    networks:
+      - monitoring
+
+# ==========================================================
+# Prometheus B
+# ==========================================================
+
+  prometheus-b:
+
+    image: prom/prometheus:latest
+
+    container_name: prometheus-b
+
+    restart: unless-stopped
+
+    ports:
+      - "9091:9090"
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+
+    volumes:
+      - ./prometheus-b/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-b-data:/prometheus
+
+    networks:
+      - monitoring
+
+# ==========================================================
+# Prometheus C
+# ==========================================================
+
+  prometheus-c:
+
+    image: prom/prometheus:latest
+
+    container_name: prometheus-c
+
+    restart: unless-stopped
+
+    ports:
+      - "9092:9090"
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+
+    volumes:
+      - ./prometheus-c/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-c-data:/prometheus
+
+    networks:
+      - monitoring
+# ==========================================================
+# thanos-sidecar-a, thanos-sidecar-b, thanos-sidecar-c
+# ==========================================================
+  thanos-sidecar-a:
+    image: quay.io/thanos/thanos:v0.38.0
+    container_name: thanos-sidecar-a
+    restart: unless-stopped
+
+    command:
+      - sidecar
+      - --log.level=info
+      - --tsdb.path=/prometheus
+      - --prometheus.url=http://prometheus-a:9090
+      - --grpc-address=0.0.0.0:10901
+      - --http-address=0.0.0.0:10902
+      - --objstore.config-file=/etc/thanos/bucket.yml
+
+    volumes:
+      - prometheus-a-data:/prometheus
+      - ./thanos/bucket.yml:/etc/thanos/bucket.yml
+
+    depends_on:
+      - prometheus-a
+      - minio
+
+    ports:
+      - "10902:10902"
+
+    networks:
+      - monitoring
+
+
+  thanos-sidecar-b:
+    image: quay.io/thanos/thanos:v0.38.0
+    container_name: thanos-sidecar-b
+    restart: unless-stopped
+
+    command:
+      - sidecar
+      - --log.level=info
+      - --tsdb.path=/prometheus
+      - --prometheus.url=http://prometheus-b:9090
+      - --grpc-address=0.0.0.0:10901
+      - --http-address=0.0.0.0:10902
+      - --objstore.config-file=/etc/thanos/bucket.yml
+
+    volumes:
+      - prometheus-b-data:/prometheus
+      - ./thanos/bucket.yml:/etc/thanos/bucket.yml
+
+    depends_on:
+      - prometheus-b
+      - minio
+
+    ports:
+      - "10912:10902"
+
+    networks:
+      - monitoring
+
+
+  thanos-sidecar-c:
+    image: quay.io/thanos/thanos:v0.38.0
+    container_name: thanos-sidecar-c
+    restart: unless-stopped
+
+    command:
+      - sidecar
+      - --log.level=info
+      - --tsdb.path=/prometheus
+      - --prometheus.url=http://prometheus-c:9090
+      - --grpc-address=0.0.0.0:10901
+      - --http-address=0.0.0.0:10902
+      - --objstore.config-file=/etc/thanos/bucket.yml
+
+    volumes:
+      - prometheus-c-data:/prometheus
+      - ./thanos/bucket.yml:/etc/thanos/bucket.yml
+
+    depends_on:
+      - prometheus-c
+      - minio
+
+    ports:
+      - "10922:10902"
+
+    networks:
+      - monitoring
+# ==========================================================
+# thanos-store
+# ==========================================================
+
+  thanos-store:
+    image: quay.io/thanos/thanos:v0.38.0
+    container_name: thanos-store
+    restart: unless-stopped
+
+    command:
+      - store
+      - --log.level=info
+      - --grpc-address=0.0.0.0:10901
+      - --http-address=0.0.0.0:10902
+      - --data-dir=/var/thanos/store
+      - --objstore.config-file=/etc/thanos/bucket.yml
+
+    volumes:
+      - ./thanos/bucket.yml:/etc/thanos/bucket.yml
+
+    ports:
+      - "10930:10902"
+
+    depends_on:
+      - minio
+
+    networks:
+      - monitoring
+# ==========================================================
+# thanos-query
+# ==========================================================
+  thanos-query:
+    image: quay.io/thanos/thanos:v0.38.0
+    container_name: thanos-query
+    restart: unless-stopped
+
+    command:
+      - query
+      - --log.level=info
+      - --http-address=0.0.0.0:9090
+      - --grpc-address=0.0.0.0:10901
+
+      - --store=thanos-sidecar-a:10901
+      - --store=thanos-sidecar-b:10901
+      - --store=thanos-sidecar-c:10901
+      - --store=thanos-store:10901
+
+    ports:
+      - "9095:9090"
+
+    depends_on:
+      - thanos-store
+      - thanos-sidecar-a
+      - thanos-sidecar-b
+      - thanos-sidecar-c
+
+    networks:
+      - monitoring
+
+# ==========================================================
+# grafana
+# ==========================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+    depends_on:
+      - thanos-query
+
+    networks:
+      - monitoring
+# ==========================================================
+# Remaining services will be added in Part 2
+#
+# - Thanos Sidecar A
+# - Thanos Sidecar B
+# - Thanos Sidecar C
+# - Thanos Store Gateway
+# - Thanos Query
+# - Grafana
+# ==========================================================
+
+networks:
+
+  monitoring:
+    driver: bridge
+
+volumes:
+
+  minio-data:
+
+  prometheus-a-data:
+
+  prometheus-b-data:
+
+  prometheus-c-data:
+
+  grafana-data:
