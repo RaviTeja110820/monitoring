@@ -8,6 +8,11 @@ global:
 
   evaluation_interval: 15s
 
+
+  external_labels:
+    replica: prometheus-a
+
+
 # ==========================================
 # Scrape Configurations
 # ==========================================
